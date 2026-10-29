@@ -18,8 +18,8 @@ var themes embed.FS
 type Config struct {
 	// Theme selects a theme
 	Theme string
-	// Partial true will render only the body content, no <head> etc.
-	Partial bool
+	// Standalone will render a complete HTML file
+	Standalone bool
 	// Minify the HTML and CSS output.
 	Minify bool
 	// EmbedCSS embeds the provided CSS in a <style> tag.
@@ -36,25 +36,29 @@ func Render(output io.Writer, doc *Document, cfg *Config) error {
 		m.AddFunc("text/css", css.Minify)
 		m.AddFunc("text/html", html.Minify)
 	}
+	doc.Standalone = cfg.Standalone
 
-	doc.Standalone = !cfg.Partial
-	if cfg.EmbedCSS == "" {
-		cfg.EmbedCSS = "templates/" + cfg.Theme + ".css"
-	}
-
-	cssBytes, err := fs.ReadFile(themes, cfg.EmbedCSS)
-	if err != nil {
-		return err
-	}
-	if cfg.Minify {
-		cssBytes, err = m.Bytes("text/css", cssBytes)
-		if err != nil {
-			return err
-		}
-	}
-	doc.StyleContent = template.HTML("<style>" + string(cssBytes) + "</style>")
+	var err error
 	if cfg.LinkCSS != "" {
 		doc.StyleContent = template.HTML(`<link rel="stylesheet" href="` + cfg.LinkCSS + `">`)
+	} else {
+		var cssBytes []byte
+		if cfg.EmbedCSS == "" {
+			cfg.EmbedCSS = "templates/" + cfg.Theme + ".css"
+			cssBytes, err = fs.ReadFile(themes, cfg.EmbedCSS)
+			if err != nil {
+				return err
+			}
+		} else {
+			cssBytes = []byte(cfg.EmbedCSS)
+		}
+		if cfg.Minify {
+			cssBytes, err = m.Bytes("text/css", cssBytes)
+			if err != nil {
+				return err
+			}
+		}
+		doc.StyleContent = template.HTML("<style>" + string(cssBytes) + "</style>")
 	}
 	tmpl, err := template.ParseFS(themes, "templates/"+cfg.Theme+".tmpl")
 	if err != nil {

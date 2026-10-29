@@ -22,13 +22,13 @@ func main() {
 
 func run(
 	args []string,
-	getenv func(string) string,
+	_ func(string) string,
 	stdin io.Reader,
 	stdout, stderr io.Writer,
 ) error {
 	fs := new(flag.FlagSet)
 	fs.SetOutput(stderr)
-	embedCSS := fs.String("embed-css", "", "Embed CSS from file")
+	embedCSS := fs.String("embed-css", "", "Embed CSS")
 	inPath := fs.String("input", "", "Path to OpenAPI definition")
 	isStandalone := fs.Bool("standalone", false, "Create standalone HTML")
 	linkCSS := fs.String("link-css", "", "Provide href for CSS file")
@@ -102,11 +102,11 @@ func run(
 		return err
 	}
 	cfg := &openapidocs.Config{
-		Minify:   *minifyOutput,
-		Partial:  !*isStandalone,
-		Theme:    *theme,
-		EmbedCSS: *embedCSS,
-		LinkCSS:  *linkCSS,
+		Minify:     *minifyOutput,
+		Standalone: *isStandalone,
+		Theme:      *theme,
+		EmbedCSS:   *embedCSS,
+		LinkCSS:    *linkCSS,
 	}
 	return openapidocs.Render(output, doc, cfg)
 }
