@@ -232,6 +232,12 @@ article {
 	color: var(--red);
 	border-color: var(--red-border);
 }
+.status-2XX, .status-3XX {
+	color: var(--green);
+}
+.status-4XX {
+	color: var(--orange);
+}
 .samples {
 	min-width: 0;
 	padding: 1.5rem;
@@ -267,20 +273,17 @@ article {
 }
 nav.sidebar {
 	font-size: .84rem;
-	strong {
+	.title {
 		display: block;
-		margin: 0 0 .9rem;
+		margin-bottom: .9rem;
 		color: var(--ink);
 		font-size: .72rem;
+		font-weight: 700;
 		letter-spacing: .08em;
 		text-transform: uppercase;
 	}
-	ul {
-		list-style: none;
-		padding-left: 0;
-	}
-	li {
-		margin: .6em 0;
+	details {
+		margin-bottom: 0;
 	}
 	summary {
 		color: var(--ink);
@@ -290,6 +293,7 @@ nav.sidebar {
 	a {
 		align-items: flex-start;
 		display: flex;
+		margin: .6em 0;
 	}
 	.method {
 		flex-shrink: 0;
@@ -323,19 +327,6 @@ nav.sidebar {
 		word-break: break-word;
 	}
 }
-.response {
-	.status-200, .status-201, .status-202, .status-204, .status-303 {
-		color: var(--green);
-	}
-	.status-400, .status-404 {
-		color: var(--orange);
-	}
-	.status-401, .status-403, .status-428 {
-		color: var(--red);
-	}
-	.body {
-	}
-}
 .media-type {
 	display: inline-block;
 	margin: .35rem 0 .55rem;
@@ -345,6 +336,7 @@ nav.sidebar {
 @media (max-width: 900px) {
 	.layout {
 		grid-template-columns: 14rem minmax(0, 1fr);
+		overflow: auto;
 	}
 	article {
 		grid-template-columns: 1fr;
@@ -359,6 +351,7 @@ nav.sidebar {
 	}
 	.layout {
 		display: block;
+		overflow: auto;
 	}
 	nav.sidebar {
 		position: static;

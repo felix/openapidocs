@@ -48,7 +48,7 @@
 								<code>{{.Path}}</code>
 							</h3>
 
-							{{with .Summary}}<p><strong>{{.}}</strong></p>{{end}}
+							{{with .Summary}}<p class="summary">{{.}}</p>{{end}}
 
 							<!--
 							<div class="tags">
@@ -73,12 +73,7 @@
 								{{if $response.Content}}
 								{{template "responseBody" $response}}
 								{{else}}
-								<p class="response">
-								<span class="status-{{$status}}">
-									{{template "statusCode" $status}}
-									<span class="description">{{$response.Description}}</span>
-								</span>
-								</p>
+								<p>No content</p>
 								{{end}}
 							</details>
 							{{end}}
@@ -101,36 +96,28 @@
 {{define "sidebar"}}
 {{$tags := .Tags}}
 <nav class="sidebar">
-	<strong>Contents</strong>
-	<ul>
-		<li><a href="#overview">Overview</a></li>
-		{{range $tagName, $endpoints := .TagGroups}}
-		{{$tag := index $tags $tagName}}
-		<li>
-			<details>
-				<summary title="{{$tag.Description}}">{{$tagName}}</summary>
-				{{if $tag.Description}}
-				<p class="description">{{$tag.DescriptionHTML}}</p>
-				{{end}}
-				<ul>
-					{{range $endpoint := $endpoints}}
-					<li class="endpoint">
-						<a href="#{{$endpoint.Slug}}">
-							<span class="tag method {{$endpoint.Method}}">{{$endpoint.Method}}</span>
-							{{$endpoint.Summary}}
-						</a>
-					</li>
-					{{end}}
-				</ul>
-			</details>
-		</li>
+	<span class="title">Contents</span>
+	<a href="#overview">Overview</a>
+	{{range $tagName, $endpoints := .TagGroups}}
+	{{$tag := index $tags $tagName}}
+	<details>
+		<summary title="{{$tag.Description}}">{{$tagName}}</summary>
+		{{if $tag.Description}}
+		<p class="description">{{$tag.DescriptionHTML}}</p>
 		{{end}}
-	</ul>
+		{{range $endpoint := $endpoints}}
+		<a href="#{{$endpoint.Slug}}">
+			<span class="tag method {{$endpoint.Method}}">{{$endpoint.Method}}</span>
+			{{$endpoint.Summary}}
+		</a>
+		{{end}}
+	</details>
+	{{end}}
 </nav>
 {{end}}
 
 {{define "statusCode"}}
-<span class="tag status" title="HTTP status {{.}}">{{.}}</span>
+<span class="tag status status-{{slice . 0 1}}XX" title="HTTP status {{.}}">{{.}}</span>
 {{end}}
 
 {{define "requestBody"}}
