@@ -80,6 +80,9 @@ func DocumentFromSpec(spec *Spec) (*Document, error) {
 			if m.op == nil {
 				continue
 			}
+			params := groupParameters(append(
+				item.Parameters,
+				m.op.Parameters...))
 
 			slug := buildSlug(m.name, path)
 			endpoint := Endpoint{
@@ -88,7 +91,7 @@ func DocumentFromSpec(spec *Spec) (*Document, error) {
 				Summary:     m.op.Summary,
 				Description: m.op.DescriptionHTML(),
 				Tags:        m.op.Tags,
-				Parameters:  groupParameters(m.op.Parameters),
+				Parameters:  params,
 				RequestBody: m.op.RequestBody,
 				Responses:   m.op.Responses,
 				Deprecated:  m.op.Deprecated,
@@ -126,6 +129,13 @@ func processSpec(spec *Spec) {
 
 	// Process each operation
 	for _, pathItem := range spec.Paths {
+		for i, p := range pathItem.Parameters {
+			if p.Ref == "" {
+				continue
+			}
+			resolveParamRefs(&p, spec.Components, cache)
+			pathItem.Parameters[i] = p
+		}
 		ops := []*Operation{
 			pathItem.Get,
 			pathItem.Post,
