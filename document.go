@@ -342,8 +342,8 @@ func renderOperationExamples(op *Operation) {
 
 }
 
-func renderExample(content map[string]Content) {
-	marshal := func(in any, ct string) any {
+func renderExample(content map[string]MediaType) {
+	marshal := func(ct string, in any) any {
 		var out any
 		switch ct {
 		case "application/json":
@@ -351,6 +351,7 @@ func renderExample(content map[string]Content) {
 			v := jsontext.Value(b)
 			_ = v.Indent(jsontext.EscapeForHTML(true), jsontext.WithIndent("  "))
 			out = string(v)
+		case "multipart/form-data":
 		default:
 			out = in
 		}
@@ -362,13 +363,28 @@ func renderExample(content map[string]Content) {
 		}
 		if len(c.Examples) > 0 {
 			for n, ex := range c.Examples {
-				ex.Rendered = marshal(ex.Value, ct)
+				ex.Rendered = marshal(ct, ex.Value)
 				c.Examples[n] = ex
 			}
 			continue
 		}
-		ex := generateExampleSchema(c.Schema, ct)
-		c.Example = marshal(ex, ct)
+		if c.Encoding != nil {
+			c.Examples = make(map[string]ExampleObject)
+			for name, enc := range c.Encoding {
+				sch, ok := c.Schema.Properties[name]
+				if !ok {
+					continue
+				}
+				ex := generateExampleSchema(sch, ct)
+				exObj := ExampleObject{
+					Rendered: marshal(enc.ContentType, ex),
+				}
+				c.Examples[name] = exObj
+			}
+		} else {
+			ex := generateExampleSchema(c.Schema, ct)
+			c.Example = marshal(ct, ex)
+		}
 		content[ct] = c
 	}
 }

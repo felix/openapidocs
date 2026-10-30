@@ -101,20 +101,29 @@ type Parameter struct {
 }
 
 type RequestBody struct {
-	Description string             `json:"description,omitempty" yaml:"description,omitempty"`
-	Required    bool               `json:"required,omitempty" yaml:"required,omitempty"`
-	Content     map[string]Content `json:"content,omitempty" yaml:"content,omitempty"`
+	Description string               `json:"description,omitempty" yaml:"description,omitempty"`
+	Required    bool                 `json:"required,omitempty" yaml:"required,omitempty"`
+	Content     map[string]MediaType `json:"content,omitempty" yaml:"content,omitempty"`
 }
 
 type Response struct {
-	Description string             `json:"description" yaml:"description"`
-	Content     map[string]Content `json:"content,omitempty" yaml:"content,omitempty"`
+	Description string               `json:"description" yaml:"description"`
+	Content     map[string]MediaType `json:"content,omitempty" yaml:"content,omitempty"`
 }
 
-type Content struct {
+type MediaType struct {
 	Schema   *Schema                  `json:"schema,omitempty" yaml:"schema,omitempty"`
+	Encoding map[string]Encoding      `json:"encoding,omitempty" yaml:"encoding,omitempty"`
 	Example  any                      `json:"example,omitempty" yaml:"example,omitempty"`
 	Examples map[string]ExampleObject `json:"examples,omitempty" yaml:"examples,omitempty"`
+}
+
+type Encoding struct {
+	ContentType string              `json:"contentType,omitempty" yaml:"contentType,omitempty"`
+	Encoding    map[string]Encoding `json:"encoding,omitempty" yaml:"encoding,omitempty"`
+	//Headers     map[string]string
+	//PrefixEncoding *Encoding `json:"prefixEncoding,omitempty" yaml:"prefixEncoding,omitempty"`
+	//ItemEncoding   *Encoding `json:"itemEncoding,omitempty" yaml:"itemEncoding,omitempty"`
 }
 
 // ExampleObject is an OpenAPI Example Object (the `value` is what we render).
