@@ -7,7 +7,7 @@ import (
 	"html/template"
 	"maps"
 	"regexp"
-	"sort"
+	"slices"
 	"strings"
 	"time"
 )
@@ -19,8 +19,8 @@ type Document struct {
 	Version     string
 	Servers     []Server
 	Tags        map[string]Tag
-	Endpoints   []Endpoint
-	TagGroups   map[string][]Endpoint
+	Endpoints   []*Endpoint
+	TagGroups   map[string][]*Endpoint
 	Standalone  bool
 
 	StyleContent template.HTML
@@ -29,6 +29,7 @@ type Document struct {
 type Endpoint struct {
 	Method      string
 	Path        string
+	Prefixes    []string
 	Summary     string
 	Description template.HTML
 	Tags        []string
@@ -47,18 +48,24 @@ func DocumentFromSpec(spec *Spec) (*Document, error) {
 		Version:     spec.Info.Version,
 		Servers:     spec.Servers,
 		Tags:        make(map[string]Tag, len(spec.Tags)),
-		TagGroups:   make(map[string][]Endpoint),
+		TagGroups:   make(map[string][]*Endpoint),
+		//Endpoints:   make([]*Endpoint, 0),
 	}
 
 	for _, t := range spec.Tags {
 		doc.Tags[t.Name] = t
 	}
 
-	paths := make([]string, 0, len(spec.Paths))
-	for path := range spec.Paths {
-		paths = append(paths, path)
+	var prefixes []string
+	if len(spec.Servers) > 0 {
+		prefixes = make([]string, len(spec.Servers))
+		for i, s := range spec.Servers {
+			prefixes[i] = s.URL
+		}
+	} else {
+		prefixes = []string{"/"}
 	}
-	sort.Strings(paths)
+	paths := slices.Sorted(maps.Keys(spec.Paths))
 
 	for _, path := range paths {
 		item := spec.Paths[path]
@@ -84,9 +91,10 @@ func DocumentFromSpec(spec *Spec) (*Document, error) {
 				m.op.Parameters...))
 
 			slug := buildSlug(m.name, path)
-			endpoint := Endpoint{
+			endpoint := &Endpoint{
 				Method:      m.name,
 				Path:        path,
+				Prefixes:    prefixes,
 				Summary:     m.op.Summary,
 				Description: m.op.DescriptionHTML(),
 				Tags:        m.op.Tags,
@@ -97,13 +105,11 @@ func DocumentFromSpec(spec *Spec) (*Document, error) {
 				Slug:        slug,
 			}
 			doc.Endpoints = append(doc.Endpoints, endpoint)
-
 			if len(endpoint.Tags) == 0 {
-				doc.TagGroups["default"] = append(doc.TagGroups["default"], endpoint)
-			} else {
-				for _, tag := range endpoint.Tags {
-					doc.TagGroups[tag] = append(doc.TagGroups[tag], endpoint)
-				}
+				endpoint.Tags = []string{"default"}
+			}
+			for _, tag := range endpoint.Tags {
+				doc.TagGroups[tag] = append(doc.TagGroups[tag], endpoint)
 			}
 		}
 	}
