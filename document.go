@@ -10,7 +10,6 @@ import (
 	"sort"
 	"strings"
 	"time"
-	"uuid"
 )
 
 type Document struct {
@@ -369,8 +368,8 @@ func renderExample(content map[string]Content) {
 }
 
 var (
-	now = time.Now().UTC().Format(time.RFC3339)
-	uid = uuid.NewV7().String()
+	then = time.Date(2006, 1, 2, 3, 4, 5, 0, time.UTC)
+	uuid = "01a18a20-c665-763d-ad69-d5b623fa65ec"
 )
 
 func generateExampleSchema(schema *Schema, name string) any {
@@ -415,13 +414,13 @@ func objectExample(schema *Schema, name string) any {
 	case "string":
 		switch {
 		case schema.Format == "date-time":
-			return now
+			return then
 		case schema.Format == "email":
 			return "user@example.com"
 		case schema.Format == "uuid":
-			return uid
+			return uuid
 		case strings.Contains(name, "id"):
-			return uid
+			return uuid
 		default:
 			return "string"
 		}
