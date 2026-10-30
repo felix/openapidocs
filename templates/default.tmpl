@@ -176,8 +176,8 @@
 		</dt>
 		<dd>
 			{{with .Schema}}
-			{{if ne .Type "array"}}<span class="type">{{.Type}}</span>{{end}}
-			{{with .Format}}<span class="format">&lt;{{.}}&gt;</span>{{end}}
+			{{if ne .Type "array"}}<span class="schema-type">{{.Type}}</span>{{end}}
+			{{with .Format}}<span class="schema-format">&lt;{{.}}&gt;</span>{{end}}
 			{{template "schema" .}}
 			{{end}}
 			{{if .Description}}<span class="description">{{.DescriptionHTML}}</span>{{end}}
@@ -198,8 +198,8 @@
 	</dt>
 	<dd>
 		{{with $schema}}
-		{{if ne .Type "array"}}<span class="type">{{.Type}}</span>{{end}}
-		{{with .Format}}<span class="format">&lt;{{.}}&gt;</span>{{end}}
+		{{if ne .Type "array"}}<span class="schema-type">{{.Type}}</span>{{end}}
+		{{with .Format}}<span class="schema-format">&lt;{{.}}&gt;</span>{{end}}
 		{{template "schema" .}}
 		{{end}}
 	</dd>
@@ -210,9 +210,11 @@
 {{define "schema"}}
 <div class="schema">
 	{{if eq .Type "array"}}
-	<span class="type">array of {{.Items.Type}}</span>
+	<span class="schema-type">array of {{.Items.Type}}</span>
 	{{if eq .Items.Type "object"}}
-	{{if .Items}}<br>Array [<br>{{template "schema" .Items}}<br>]{{end}}
+	{{if .Items.Properties}}
+	<br>Array [<br>{{template "schema" .Items}}]
+	{{end}}
 	{{end}}
 	{{end}}
 	{{if .Description}}<span class="description">{{.DescriptionHTML}}</span>{{end}}
@@ -235,12 +237,12 @@
 	<select>
 	{{range .Prefixes}}
 	<option>
-	<code>{{$endpoint.Method}} {{.}}{{$endpoint.Path}}</code>
+	<code class="path">{{$endpoint.Method}} {{.}}{{$endpoint.Path}}</code>
 	</option>
 	{{end}}
 	</select>
 	{{else}}
-	<code>{{$endpoint.Method}} {{index .Prefixes 0}}{{$endpoint.Path}}</code>
+	<code class="path">{{$endpoint.Method}} {{index .Prefixes 0}}{{$endpoint.Path}}</code>
 	{{end}}
 
 	{{if .RequestBody}}
@@ -266,7 +268,7 @@
 		{{template "sample" $content}}
 		{{end}}
 		{{else}}
-		<p>{{template "statusCode" $status}} No content</p>
+		<p>No content</p>
 		{{end}}
 	</details>
 	{{end}}
@@ -283,7 +285,7 @@
 
 {{range $name, $example := .Examples}}
 <div class="example">
-	<p class="sample-label">
+	<p class="label">
 	{{if $example.Summary}}{{$example.Summary}}{{else}}{{$name}}{{end}}
 	</p>
 	{{if $example.Description}}
